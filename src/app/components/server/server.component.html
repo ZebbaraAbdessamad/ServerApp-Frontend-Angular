@@ -1,0 +1,92 @@
+<div class="container-fluid col-10 mt-5 mb-5">
+    <div class="table-responsive card">
+        <div class="table-wrapper">
+            <div class="table-title">
+                <div class="row card-header bg-secondary">
+                    <div class="col-sm-6 text-white">
+                        <h2>Manage Servers</h2>
+                    </div>
+                    <div class="col-sm-6">
+                        <button type="button" class="btn btn-primary m-1">Print Report <i class="fa fa-print"></i></button>
+                        <button (click)="openModal()" type="button" class="btn btn-success" data-toggle="modal" data-target="#portfolioModal2">
+                            <i class="fa fa-plus"></i>
+                            <span> New Server</span>
+                        </button>
+                        <span>
+
+                          <select (change)="OnfilterServers($event)" ngModel="ALL" name="status" class="btn btn-info m-1" >
+                            <option value="ALL">ALL</option>
+                            <option value="SERVER_UP">SERVER UP</option>
+                            <option value="SERVER_DOWN">SERVER DOWN</option>
+                          </select>
+                        </span>
+                    </div>
+                </div>
+            </div> <br>
+            <ng-container *ngIf="(appState$ | async) as appState" [ngSwitch]="appState.dataState">
+                <ng-container *ngSwitchCase="DataState.LOADING_STATE">
+                    <div class="col-md-12 single-note-item text-center mb-2">
+                        <div class="spinner-border text-success" role="status"> </div>
+                    </div>
+                </ng-container>
+                <ng-container *ngSwitchCase="DataState.LOADED_STATE">
+                    <div class="card-body">
+                        <table class="table table-striped table-hover" id="servers" *ngIf="appState.appData">
+                            <thead>
+                                <tr>
+                                    <th scope="col">N°</th>
+                                    <th scope="col">Image</th>
+                                    <th scope="col">Ip address</th>
+                                    <th scope="col">Name</th>
+                                    <th scope="col">Memory</th>
+                                    <th scope="col">Type</th>
+                                    <th scope="col">Status</th>
+                                    <th scope="col">Ping</th>
+                                    <th scope="col">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody *ngFor="let server of appState.appData.data.servers ; let i = index">
+                                <tr>
+                                    <th scope="row">{{i+1}}</th>
+                                    <th scope="row"><img *ngIf="server.imgeUrl" [src]="server.imgeUrl" [alt]="server.name" width="40" height="40"></th>
+                                    <td>{{server.ipAddress}}</td>
+                                    <td>{{server.name}}</td>
+                                    <td>{{server.memory}}</td>
+                                    <td>{{server.type}}</td>
+                                    <td *ngIf="server.statue">
+                                        <span [ngClass]="[server.statue === 'SERVER_UP' ? 'badge bg-success':'badge bg-danger' ]">
+                                        {{[server.statue === 'SERVER_UP' ? 'SERVER UP':'SERVER DOWN' ]}}
+                                        </span>
+                                    </td>
+
+                                    <td>
+                                        <a (click)="pingServer(server.ipAddress)">
+                                            <svg *ngIf="(filterStatus$ |async )  === '' || (filterStatus$ |async)  !== server.ipAddress " xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-router" viewBox="0 0 16 16">
+                                              <path d="M5.525 3.025a3.5 3.5 0 0 1 4.95 0 .5.5 0 1 0 .707-.707 4.5 4.5 0 0 0-6.364 0 .5.5 0 0 0 .707.707Z"/>
+                                              <path d="M6.94 4.44a1.5 1.5 0 0 1 2.12 0 .5.5 0 0 0 .708-.708 2.5 2.5 0 0 0-3.536 0 .5.5 0 0 0 .707.707ZM2.5 11a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm4.5-.5a.5.5 0 1 0 1 0 .5.5 0 0 0-1 0Zm2.5.5a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1Zm1.5-.5a.5.5 0 1 0 1 0 .5.5 0 0 0-1 0Zm2 0a.5.5 0 1 0 1 0 .5.5 0 0 0-1 0Z"/>
+                                              <path d="M2.974 2.342a.5.5 0 1 0-.948.316L3.806 8H1.5A1.5 1.5 0 0 0 0 9.5v2A1.5 1.5 0 0 0 1.5 13H2a.5.5 0 0 0 .5.5h2A.5.5 0 0 0 5 13h6a.5.5 0 0 0 .5.5h2a.5.5 0 0 0 .5-.5h.5a1.5 1.5 0 0 0 1.5-1.5v-2A1.5 1.5 0 0 0 14.5 8h-2.306l1.78-5.342a.5.5 0 1 0-.948-.316L11.14 8H4.86L2.974 2.342ZM14.5 9a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-13a.5.5 0 0 1-.5-.5v-2a.5.5 0 0 1 .5-.5h13Z"/>
+                                              <path d="M8.5 5.5a.5.5 0 1 1-1 0 .5.5 0 0 1 1 0Z"/>
+                                            </svg>
+                                            <i *ngIf="(filterStatus$ |async )  === server.ipAddress " class="fa fa-spinner fa-spin"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="btn btn-sm btn-danger">
+                                          <i class="fa fa-trash-o"></i>
+                                        </span>
+                                    </td>
+
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </ng-container>
+                <ng-container *ngSwitchCase="DataState.ERROR_STATE">
+                    <div *ngIf="appState.error" class="alert alert-danger p-1 m-2">
+                        {{appState.error}}
+                    </div>
+                </ng-container>
+            </ng-container>
+        </div>
+    </div>
+</div>
