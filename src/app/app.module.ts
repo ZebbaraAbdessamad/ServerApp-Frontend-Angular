@@ -10,6 +10,7 @@ import { ContactComponent } from './components/contact/contact.component';
 import { ServerComponent } from './components/server/server.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { ModalComponent } from './components/shared/modal/modal.component';
+import { NotificationModule } from './notification/notification.module';
 
 @NgModule({
   declarations: [
@@ -19,7 +20,8 @@ import { ModalComponent } from './components/shared/modal/modal.component';
     NavbarComponent,
     ContactComponent,
     ServerComponent,
-    ModalComponent
+    ModalComponent,
+
   ],
   imports: [
     BrowserModule,
@@ -27,6 +29,7 @@ import { ModalComponent } from './components/shared/modal/modal.component';
     HttpClientModule,
     FormsModule,
     ReactiveFormsModule,
+    NotificationModule
   ],
   providers: [],
   bootstrap: [AppComponent]

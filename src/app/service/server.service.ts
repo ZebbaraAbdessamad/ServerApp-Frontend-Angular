@@ -49,7 +49,7 @@ constructor(private http:HttpClient ) { }
 
   //remove server
   deleteServer$ = (SereverId:number) => <Observable<CustomResponse>>
-  this.http.delete<CustomResponse>(`${this.url}/server/ping/${SereverId}`)
+  this.http.delete<CustomResponse>(`${this.url}/server/delete/${SereverId}`)
   .pipe(
     tap(console.log),
     catchError(this.handleError)

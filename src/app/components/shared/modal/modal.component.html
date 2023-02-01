@@ -1,33 +1,56 @@
 <!-- Portfolio Modal 2-->
-<div class="portfolio-modal modal fade" id="portfolioModal2" tabindex="-1" aria-labelledby="portfolioModal2" aria-hidden="true">
-    <div class="modal-dialog modal-xl">
+<div class="modal fade" id="portfolioModal2">
+    <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header border-0"><button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button></div>
-            <div class="modal-body text-center pb-5">
-                <div class="container">
-                    <div class="row justify-content-center">
-                        <div class="col-lg-8">
-                            <!-- Portfolio Modal - Title-->
-                            <h2 class="portfolio-modal-title text-secondary text-uppercase mb-0">Tasty Cake</h2>
-                            <!-- Icon Divider-->
-                            <div class="divider-custom">
-                                <div class="divider-custom-line"></div>
-                                <div class="divider-custom-icon"><i class="fas fa-star"></i></div>
-                                <div class="divider-custom-line"></div>
+            <form #serverForm="ngForm" (ngSubmit)="SaveServer(serverForm)">
+                <div class="modal-header border-0">
+                    <h4 class="modal-title"> Add Server</h4>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center pb-5">
+                    <div class="container">
+                        <div class="form-group mb-2">
+                            <label for="" class="pull-left">IP</label>
+                            <input type="text" ngModel name="ipAddress" class="form-control" required>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="" class="pull-left">Name</label>
+                            <input type="text" ngModel name="name" class="form-control" required>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-6">
+                                <div class="form-group">
+                                    <label for="" class="pull-left">Memory</label>
+                                    <input type="text" ngModel name="memory" class="form-control" required>
+                                </div>
                             </div>
-                            <!-- Portfolio Modal - Image-->
-                            <img class="img-fluid rounded mb-5" src="" alt="..." />
-                            <!-- Portfolio Modal - Text-->
-                            <p class="mb-4">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Mollitia neque assumenda ipsam nihil, molestias magnam, recusandae quos quis inventore quisquam velit asperiores, vitae? Reprehenderit soluta, eos quod consequuntur
-                                itaque. Nam.</p>
-                            <button class="btn btn-primary" data-bs-dismiss="modal">
-                              <i class="fas fa-xmark fa-fw"></i>
-                              Close Window
+                            <div class="col-xl-6 col-lg-6 col-md-6 col-6">
+                                <div class="form-group">
+                                    <label for="" class="pull-left">Type</label>
+                                    <input type="text" ngModel name="type" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group mb-2">
+                            <label for="" class="pull-left">Status</label>
+                            <select name="statue" ngModel="SERVER_DOWN" class="form-control" required="">
+                            <option value="SERVER_UP">SERVER UP</option>
+                            <option value="SERVER_DOWN">SERVER DOWN</option>
+                         </select>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-warning" id="closeModal" data-bs-dismiss="modal">
+                            cancel
+                          </button>
+                            <button type="submit" [disabled]="serverForm.invalid || (isloading$ |async) " class="btn btn-info">
+                            <i *ngIf="isloading$ |async" class="fa fa-spinner fa-spin"></i>
+                            <span *ngIf="isloading$ |async">Saving...</span>
+                            <span *ngIf="!(isloading$ |async)">Add</span>
                           </button>
                         </div>
                     </div>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 </div>

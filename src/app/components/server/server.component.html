@@ -7,8 +7,8 @@
                         <h2>Manage Servers</h2>
                     </div>
                     <div class="col-sm-6">
-                        <button type="button" class="btn btn-primary m-1">Print Report <i class="fa fa-print"></i></button>
-                        <button (click)="openModal()" type="button" class="btn btn-success" data-toggle="modal" data-target="#portfolioModal2">
+                        <button (click)="OnprintReport()" type="button" class="btn btn-primary m-1">Print Report <i class="fa fa-print"></i></button>
+                        <button type="button" data-bs-toggle="modal" data-bs-target="#portfolioModal2" class="btn btn-success">
                             <i class="fa fa-plus"></i>
                             <span> New Server</span>
                         </button>
@@ -26,7 +26,7 @@
             <ng-container *ngIf="(appState$ | async) as appState" [ngSwitch]="appState.dataState">
                 <ng-container *ngSwitchCase="DataState.LOADING_STATE">
                     <div class="col-md-12 single-note-item text-center mb-2">
-                        <div class="spinner-border text-success" role="status"> </div>
+                        <div class="spinner-border text-secondary" role="status"> </div>
                     </div>
                 </ng-container>
                 <ng-container *ngSwitchCase="DataState.LOADED_STATE">
@@ -71,9 +71,9 @@
                                         </a>
                                     </td>
                                     <td>
-                                        <span class="btn btn-sm btn-danger">
-                                          <i class="fa fa-trash-o"></i>
-                                        </span>
+                                        <a (click)="OndeleteServer(server)" class="btn btn-sm btn-danger">
+                                            <i class="fa fa-trash-o"></i>
+                                        </a>
                                     </td>
 
                                 </tr>
@@ -90,3 +90,5 @@
         </div>
     </div>
 </div>
+<notifier-container></notifier-container>
+<app-modal (ServerEventEmitter)="onSave($event)" [isloading$]="isloading$"></app-modal>

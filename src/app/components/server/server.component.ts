@@ -1,4 +1,5 @@
-import { ModalComponent } from './../shared/modal/modal.component';
+
+import { ServerAction } from './../../interface/ServerAction';
 import { Status } from './../../enum/status.enum';
 import { Server } from './../../interface/server';
 import { DataState } from './../../enum/data-state.enum';
@@ -8,7 +9,10 @@ import { AppState } from './../../interface/app-state';
 import {  BehaviorSubject, map, Observable, of } from 'rxjs';
 import { catchError, startWith } from 'rxjs/operators';
 import { Component, OnInit } from '@angular/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgForm } from '@angular/forms';
+import { ServerActionTypes } from 'src/app/enum/ServerActionTypes.enum';
+import { NotificationService } from 'src/app/service/notificationServices/notification.service';
+
 
 @Component({
   selector: 'app-server',
@@ -16,32 +20,35 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
   styleUrls: ['./server.component.css']
 })
 export class ServerComponent implements OnInit {
+
+
   appState$?:Observable<AppState<CustomResponse>>;
   readonly DataState = DataState;
   readonly Tsetstatue=Status;
 
   private filterSubject = new BehaviorSubject<string>('');
   private dataSubject? = new BehaviorSubject<CustomResponse | null>(null);
-
-
   filterStatus$ = this.filterSubject.asObservable();
 
-  constructor(private serverService:ServerService,private modalService: NgbModal){}
-  openModal() {
-    this.modalService.open(ModalComponent);
-  }
+
+  private isloading = new BehaviorSubject<boolean>(false);
+  isloading$ = this.isloading.asObservable();
+
+
+  constructor(private serverService:ServerService ,private notifierServer: NotificationService){}
+
 
   ngOnInit(): void {
   this.appState$ = this.serverService.servers$
   .pipe(
     map(response =>{
       this.dataSubject?.next(response);
-      console.log('zebbara',response ,'----------')
-      return {dataState:DataState.LOADED_STATE  ,appData:response}
+      //-------------------this line means appData:{} keep the resopnse as it was and modify the data exactly the servers (like:@overid)
+      return {dataState:DataState.LOADED_STATE  ,appData:{...response ,data:{servers:response.data.servers?.reverse()}}}
     }),
     startWith({dataState:DataState.LOADING_STATE }),
     catchError((error:string)=>{
-      console.log('hello error',error ,'----------')
+      this.notifierServer.onError(error);
       return of({dataState:DataState.ERROR_STATE ,error})
     })
 
@@ -53,6 +60,7 @@ export class ServerComponent implements OnInit {
     this.appState$ = this.serverService.pingServer$(ipAddress)
     .pipe(
       map(response =>{
+        this.notifierServer.onDefault(response.message);
         if (this.dataSubject?.value?.data.servers) {
           let filteredServers = this.dataSubject.value.data.servers.filter(server => server !== undefined);
           let index = filteredServers.findIndex(server => server.id === response.data.server?.id);
@@ -66,6 +74,7 @@ export class ServerComponent implements OnInit {
 
       startWith({dataState:DataState.LOADED_STATE ,appData: this.dataSubject?.value}),
       catchError((error:string)=>{
+        this.notifierServer.onError(error);
         this.filterSubject.next('');
         return of({dataState:DataState.ERROR_STATE ,error})
       })
@@ -79,10 +88,12 @@ export class ServerComponent implements OnInit {
       this.appState$ = this.serverService.filterServer(status, this.dataSubject.value)
       .pipe(
         map(response =>{
+          this.notifierServer.onDefault(response.message);
           return {dataState:DataState.LOADED_STATE  ,appData: response}
         }),
         startWith({dataState:DataState.LOADED_STATE ,appData: this.dataSubject.value}),
         catchError((error:string)=>{
+          this.notifierServer.onError(error);
           return of({dataState:DataState.ERROR_STATE ,error})
         })
 
@@ -91,4 +102,78 @@ export class ServerComponent implements OnInit {
 
   }
 
+
+
+  OnSaveServer(serverForm:NgForm):void {
+    this.isloading.next(true);
+    this.appState$ = this.serverService.saveServer$(serverForm.value as Server)
+      .pipe(
+      map(response =>{
+        this.notifierServer.onSuccess(response.message);
+        if (this.dataSubject?.value?.data.servers && response.data.server ) {
+          this.dataSubject?.next(
+            {...response,data:{servers:[response.data.server,...this.dataSubject.value?.data.servers]}}
+          );
+        }
+        document.getElementById('closeModal')?.click();
+        this.isloading.next(false);
+        serverForm.resetForm({status:this.Tsetstatue.SERVER_DOWN});
+        return {dataState:DataState.LOADED_STATE  ,appData: this.dataSubject?.value}
+      }),
+
+      startWith({dataState:DataState.LOADED_STATE ,appData: this.dataSubject?.value}),
+      catchError((error:string)=>{
+        this.notifierServer.onError(error);
+        this.isloading.next(false);
+        return of({dataState:DataState.ERROR_STATE ,error})
+      })
+
+    );
+  }
+
+  onSave(event:ServerAction){
+    if(event.type===ServerActionTypes.NEW_SERVER){
+      this.OnSaveServer(event.payload);
+    }
+  }
+
+
+  OndeleteServer(server:Server):void {
+    console.log("remove----------------");
+    this.appState$ = this.serverService.deleteServer$(server.id)
+    .pipe(
+      map(response =>{
+        this.notifierServer.onWarning(response.message);
+        this.dataSubject?.next(
+          {...response,data:{servers:this.dataSubject.value?.data.servers?.filter(s=>s.id !== server.id)}}
+        );
+        return {dataState:DataState.LOADED_STATE  ,appData: this.dataSubject?.value}
+      }),
+      startWith({dataState:DataState.LOADED_STATE ,appData: this.dataSubject?.value}),
+      catchError((error:string)=>{
+        this.notifierServer.onError(error);
+        return of({dataState:DataState.ERROR_STATE ,error})
+      })
+
+    );
+  }
+
+
+  OnprintReport():void{
+    this.notifierServer.onInfo('Report downloaded successfuly');
+    //window.print();
+    let dataType ='application/vnd.ms-excel.sheet.macroEnabled.12';
+    let tableSelect = document.getElementById('servers');
+    let tableHtml = tableSelect?.outerHTML.replace(/ /g,'%20');
+    let downloadLink = document.createElement('a');
+    document.body.appendChild(downloadLink);
+    downloadLink.href = 'data:' + dataType +','+tableHtml;
+    downloadLink.download = 'servers-report.xls';
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+
+
+
+
+  }
 }

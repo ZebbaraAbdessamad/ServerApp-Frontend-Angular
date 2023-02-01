@@ -5,9 +5,9 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
-   { path:"",component:HomeComponent},
    { path: "server/list", component: ServerComponent },
    { path: "server/contact", component: ContactComponent },
+   { path:"**",component:HomeComponent}
 
 
 ];
