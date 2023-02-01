@@ -1,3 +1,9 @@
+<h3>Home page</h3>
+<img src="https://github.com/ZebbaraAbdessamad/ServerApp-Frontend-Angular/blob/main/src/assets/image/appImages/server_2.PNG" class="img-fluid" alt="Responsive image">
+<h3>Servers page</h3>
+<img src="https://github.com/ZebbaraAbdessamad/ServerApp-Frontend-Angular/blob/main/src/assets/image/appImages/servers-App.PNG" class="rounded float-left" alt="">
+
+
 # ServerApp
 
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 14.2.3.
